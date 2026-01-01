@@ -5,8 +5,8 @@ if __name__ == "__main__":
     game = Game()
     render = Renderer(game)
 
-    game.reset()
-    render.reset()
-    render.render()
-
-    input("Waiting")
+    while True:
+        game.reset()
+        render.reset()
+        render.render()
+        input("Waiting")
