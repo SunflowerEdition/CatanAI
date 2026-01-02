@@ -45,6 +45,14 @@ class Renderer:
         self._draw_static_layer()
 
 
+    @staticmethod
+    def close():
+        """
+        Close the environment and clean up resources.
+        """
+        pygame.quit()
+
+
     def _load_hex_images(self):
         """
         Loads and scales all hex images.

@@ -1,4 +1,4 @@
-from Board import Board
+from board import Board
 from tile import Tile
 from node import Node
 from edge import Edge
