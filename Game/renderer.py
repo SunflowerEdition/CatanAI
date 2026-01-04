@@ -35,14 +35,30 @@ class Renderer:
         self.hex_padding_x = 10 * self.image_scale
         self.hex_padding_y = 10 * self.image_scale
 
+        # Initialize storage for storing tile, node, and edge positions on the board
+        self.tile_positions = []
+        self.node_positions = []
+        self.edge_positions = []
+
 
     def reset(self):
+        # Reset tile positions
+        self.tile_positions = []
+        self.node_positions = []
+        self.edge_positions = []
+
         # Clear both layers
         self.static_surface.fill((0, 0, 0, 0))
         self.dynamic_surface.fill((0, 0, 0, 0))
 
         # Build static layer
         self._draw_static_layer()
+
+
+    def render(self):
+        self.screen.blit(self.static_surface, (0, 0))
+        self.screen.blit(self.dynamic_surface, (0, 0))
+        pygame.display.flip()
 
 
     @staticmethod
@@ -113,13 +129,14 @@ class Renderer:
         rect = self.water_image.get_rect(topleft=(centered_width, centered_height))
         self.static_surface.blit(self.water_image, rect)
 
-        # Place the land hexes
+        # Place the land hexes and store their positions
         hex_x = self.hex_start_x + centered_width
         hex_y = self.hex_start_y + centered_height
         for i, tile in enumerate(self.game.board.tiles):
             img = self.hex_images[tile.resource_type]
             rect = img.get_rect(topleft=(hex_x, hex_y))
             self.static_surface.blit(img, rect)
+            self.tile_positions.append((hex_x, hex_y))
 
             if i == 2 or i == 11:
                 hex_x = self.hex_start_x - self.hex_width / 2  + centered_width
@@ -134,7 +151,16 @@ class Renderer:
                 hex_x += self.hex_width + self.hex_padding_x
 
 
-    def render(self):
-        self.screen.blit(self.static_surface, (0, 0))
-        self.screen.blit(self.dynamic_surface, (0, 0))
-        pygame.display.flip()
+    # --- Functions used for testing --- #
+    def testing_tiles(self):
+        # Get font
+        font = pygame.font.Font(None, 32)
+
+        # Draw the tile indices
+        for index, (x, y) in enumerate(self.tile_positions):
+            tile_index = self.game.board.tiles[index].index
+            text = font.render(str(tile_index), True, (255, 255, 0))
+            self.static_surface.blit(text, (x + 50, y + 50))
+            self.render()
+
+            print(f"TILE INDEX: {index} -> TILE TYPE: {self.game.board.tiles[index].resource_type.name}")
