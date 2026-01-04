@@ -5,8 +5,10 @@ if __name__ == "__main__":
     game = Game()
     render = Renderer(game)
 
-    while True:
-        game.reset()
-        render.reset()
-        render.render()
-        input("Waiting")
+    # Initialize game and renderer
+    game.reset()
+    render.reset()
+    render.render()
+
+    # Get starting positions
+    game.get_starting_positions()
