@@ -10,8 +10,16 @@ if __name__ == "__main__":
     render.reset()
     render.render()
 
+    for i in range(72):
+        print(f"INDEX {i}")
+        game.assign_road(0, i)
+        render.render()
+        game.board.edges[i].owned_by = None
+        input("Press Enter to continue...")
+
+
     # Get starting positions (THIS NEEDS TO BE IMPLEMENTED)
-    game.run_starting_positions()
+    #game.run_starting_positions()
 
 
     # Run tests

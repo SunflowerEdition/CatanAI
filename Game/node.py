@@ -8,7 +8,7 @@ class Node:
         """
         self.index = index
         self.edges = [] # Edges the node is touching
-        self.owned_by = None # The index of the player that owns this node
+        self.owned_by = None # Reference to the player that owns this edge
 
 
     def reset(self):

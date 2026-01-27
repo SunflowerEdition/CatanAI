@@ -1,4 +1,3 @@
-from board import Board
 from player import Player
 from topology import create_four_player_board
 
@@ -31,3 +30,6 @@ class Game:
         # Get their second settlement and road
         for player in reversed(self.players):
             settlement_idx, road_idx = player.get_starting_position(self.board)
+
+    def assign_road(self, player_idx, road_idx):
+        self.board.edges[road_idx].owned_by = self.players[player_idx]

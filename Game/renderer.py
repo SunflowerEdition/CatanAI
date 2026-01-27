@@ -8,7 +8,7 @@ class Renderer:
 
         :param game: The game object that stores all the game logic
         :param window_size: The size of the render window
-        :param target_hex_width: The target hex width
+        :param image_scale: The amount to scale the image by
         """
         self.game = game
         self.window_width, self.window_height = window_size
@@ -40,6 +40,17 @@ class Renderer:
         self.node_positions = []
         self.edge_positions = []
 
+        # Used for determining edge positions and sizing
+        self.edge_width_frac = 0.4
+        self.edge_position_shift = [ # how much to shift the edge over (times edge width)
+            (0.25, 0.125), (0.75, 0.125), (0, 0.5),
+            (1.0, 0.5), (0.25, 0.875), (0.75, 0.875)
+        ]
+        self.edge_angle_shift = [30, -30, 90, 90, -30, 30] # how many degrees to rotate the edge
+
+        # Used to get the color based on the player's index
+        self.player_colour = [(255, 0, 0), (0, 0, 255), (255, 255, 255), (255, 165, 0)]
+
 
     def reset(self):
         # Reset tile positions
@@ -56,6 +67,7 @@ class Renderer:
 
 
     def render(self):
+        self._draw_dynamic_layer()
         self.screen.blit(self.static_surface, (0, 0))
         self.screen.blit(self.dynamic_surface, (0, 0))
         pygame.display.flip()
@@ -149,6 +161,50 @@ class Renderer:
                 hex_y += 0.75 * self.hex_height + self.hex_padding_y
             else:
                 hex_x += self.hex_width + self.hex_padding_x
+
+    def _draw_dynamic_layer(self):
+        # Reset the dynamic layer
+        self.dynamic_surface.fill((0, 0, 0, 0))
+
+        # So edges and nodes on multiple tiles don't get drawn multiple times
+        added_edge_indices = []
+
+        # For each hex, check what needs to be drawn
+        for i, tile in enumerate(self.game.board.tiles):
+            tile_x, tile_y = self.tile_positions[i]
+            tile_w, tile_h = self.hex_width, self.hex_height
+
+            # Check edges
+            for j, edge in enumerate(tile.edges):
+                if edge.owned_by is not None and edge.index not in added_edge_indices: # Needs to be drawn
+                    # Add it so it doesn't get drawn twice
+                    added_edge_indices.append(edge.index)
+
+                    # Get its position and angle shift
+                    shift_frac_x, shift_frac_y = self.edge_position_shift[j]
+                    angle = self.edge_angle_shift[j]
+
+                    # Compute the position of the edge rectangle
+                    pos_x = tile_x + tile_w * shift_frac_x
+                    pos_y = tile_y + tile_h * shift_frac_y
+
+                    # Compute the size of the edge
+                    edge_w = self.edge_width_frac * tile_w
+                    edge_h = self.edge_width_frac * 20
+
+                    # Create a surface for the edge
+                    edge_surf = pygame.Surface((edge_w, edge_h), pygame.SRCALPHA)
+                    edge_surf.fill(self.player_colour[edge.owned_by.index])
+
+                    # Rotate the surface
+                    edge_surf = pygame.transform.rotate(edge_surf, angle)
+
+                    # Because rotation changes size, recenter
+                    rect = edge_surf.get_rect(center=(pos_x, pos_y))
+
+                    # Draw the edge
+                    self.dynamic_surface.blit(edge_surf, rect)
+                    print("DRAWING")
 
 
     # --- Functions used for testing --- #
