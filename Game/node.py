@@ -9,6 +9,7 @@ class Node:
         self.index = index
         self.edges = [] # Edges the node is touching
         self.owned_by = None # Reference to the player that owns this edge
+        self.city = False # True if city, false otherwise
 
 
     def reset(self):
@@ -18,6 +19,7 @@ class Node:
         :return: None
         """
         self.owned_by = None
+        self.city = False
 
 
     def get_unowned_edges(self):

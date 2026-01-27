@@ -48,6 +48,13 @@ class Renderer:
         ]
         self.edge_angle_shift = [30, -30, 90, 90, -30, 30] # how many degrees to rotate the edge
 
+        # Used for determining node positions and sizing
+        self.node_width_frac = 0.5
+        self.node_position_shift = [ # how much to shift the node over (times edge width)
+            (0, 0.25), (0.5, 0), (1.0, 0.25),
+            (0, 0.75), (0.5, 1.0), (1.0, 0.75)
+        ]
+
         # Used to get the color based on the player's index
         self.player_colour = [(255, 0, 0), (0, 0, 255), (255, 255, 255), (255, 165, 0)]
 
@@ -168,6 +175,7 @@ class Renderer:
 
         # So edges and nodes on multiple tiles don't get drawn multiple times
         added_edge_indices = []
+        added_node_indices = []
 
         # For each hex, check what needs to be drawn
         for i, tile in enumerate(self.game.board.tiles):
@@ -204,7 +212,32 @@ class Renderer:
 
                     # Draw the edge
                     self.dynamic_surface.blit(edge_surf, rect)
-                    print("DRAWING")
+
+            # Check nodes
+            for j, node in enumerate(tile.nodes):
+                if node.owned_by is not None and node.index not in added_node_indices: # Needs to be drawn
+                    # Add it so it doesn't get drawn twice
+                    added_node_indices.append(node.index)
+
+                    # Get its position shift
+                    shift_frac_x, shift_frac_y = self.node_position_shift[j]
+
+                    # Compute the position of the node
+                    pos_x = tile_x + tile_w * shift_frac_x
+                    pos_y = tile_y + tile_h * shift_frac_y
+
+                    # Compute the radius of the node
+                    radius = self.node_width_frac * 20
+
+                    # Create a surface for the edge
+                    if node.city:
+                        # Square for city, centered on the node
+                        rect = pygame.Rect(0, 0, 2*radius, 2*radius)
+                        rect.center = (pos_x, pos_y)
+                        pygame.draw.rect(self.dynamic_surface, self.player_colour[node.owned_by.index], rect)
+                    else:
+                        # Circle for settlement
+                        pygame.draw.circle(self.dynamic_surface, self.player_colour[node.owned_by.index], (int(pos_x), int(pos_y)), int(radius))
 
 
     # --- Functions used for testing --- #
